@@ -1,0 +1,39 @@
+@startuml
+entity User {
+  *id : int <<PK>>
+  *username : varchar
+  reputation : int
+}
+
+entity Vulnerability {
+  *id : int <<PK>>
+  type : varchar
+  description : text
+  points : int
+}
+
+entity Report {
+  *id : int <<PK>>
+  user_id : int <<FK>>
+  vulnerability_id : int <<FK>>
+  status : tinyint
+}
+
+entity Badge {
+  *id : int <<PK>>
+  name : varchar
+  description : text
+  min_points : int
+}
+
+entity UserBadge {
+  *user_id : int <<FK>>
+  *badge_id : int <<FK>>
+  acquired_at : timestamp
+}
+
+User ||--o{ Report
+Vulnerability ||--o{ Report
+User ||--o{ UserBadge
+Badge ||--o{ UserBadge
+@enduml
