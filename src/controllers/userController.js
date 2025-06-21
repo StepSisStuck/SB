@@ -1,7 +1,7 @@
 const model = require("../models/userModel.js");
 
 
-// Question 1
+// Question 1 POST /users
 module.exports.CreateNewUser = (req, res, next) =>
 {
     if(req.body.username == undefined)
