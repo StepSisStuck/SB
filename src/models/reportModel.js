@@ -11,30 +11,62 @@ const pool = require('../services/db');
 // }
 
 
-module.exports.GetUserById = (data, callback) =>
+module.exports.GetUserById = (user_id, callback) =>
 {
     const SQLSTATEMENT = `
-    SELECT id
+    SELECT id, reputation
     FROM user
     WHERE id = ?
     `
-    const VALUES = [data.user_id]
 
-    pool.query(SQLSTATEMENT, VALUES, callback)
+    pool.query(SQLSTATEMENT, [user_id], callback)
 }
 // 
 // 
-module.exports.GetVulnerabilityById = (data, callback) =>
+module.exports.GetVulnerabilityById = (vulnerability_id, callback) =>
 {
     const SQLSTATEMENT = `
-    SELECT id
+    SELECT id, points
     FROM vulnerability
     WHERE id = ?
     `
-    const VALUES = [data.vulnerability_id]
 
-    pool.query(SQLSTATEMENT, VALUES, callback)
+    pool.query(SQLSTATEMENT, [vulnerability_id], callback)
 }
+
+module.exports.CheckReportExists = (user_id, vulnerability_id, callback) => 
+{
+    const SQLSTATEMENT = `
+    SELECT id
+    FROM report
+    WHERE user_id = ?
+    AND vulnerability_id = ?;
+    `;
+
+    pool.query(SQLSTATEMENT, [user_id, vulnerability_id], callback)
+}
+
+module.exports.CreateNewReport = (user_id, vulnerability_id, callback) => 
+{
+    const SQLSTATEMENT = `
+    INSERT INTO report (user_id, vulnerability_id)
+    VALUES (?, ?);
+    `;
+
+    pool.query(SQLSTATEMENT, [user_id, vulnerability_id], callback)
+}
+
+module.exports.UpdateReputation = (user_id, vulnerability_id, callback) =>
+{
+    const SQLSTATEMENT = `
+    UPDATE user
+    SET reputation = ?
+    WHERE id = ?
+    `;
+
+    pool.query(SQLSTATEMENT, [user_id, vulnerability_id], callback)
+}
+
 // 
 // module.exports.CheckReportExists = (data, callback) =>
 // {

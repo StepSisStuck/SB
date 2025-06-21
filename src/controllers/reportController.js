@@ -3,15 +3,11 @@ const model = require("../models/reportModel.js");
 
 // Question 7
 module.exports.CreateReport = (req, res, next) => {
+    
     const { user_id, vulnerability_id } = req.body;
 
     if (!user_id || !vulnerability_id) {
         return res.status(400).send("User_id or Vulnerability_id is required.")
-    }
-
-    const data = {
-        user_id,
-        vulnerability_id
     }
 
     model.GetUserById(user_id, (error, results) => {
@@ -24,20 +20,63 @@ module.exports.CreateReport = (req, res, next) => {
                 return res.status(404).json({message: "User not found"})
             }
         }
+        const user = results[0]
 
-    model.GetVulnerabilityById(vulnerability_id, (error2, results2) => {
+    model.GetVulnerabilityById(vulnerability_id, (error, results) => {
         if (error){
-            console.error("Error CheckVulnerabilityId:", error2);
-            return res.status(500).json(error2);
+            console.error("Error CheckVulnerabilityId:", error);
+            return res.status(500).json(error);
         } else {
-            if (results2.length === 0){
+            if (results.length === 0){
                 return res.status(404).json({message: "Vulnerability not found"})
             }
         }
+        const vuln = results[0];
+
+    model.CheckReportExists(user_id, vulnerability_id, (error, results) => {
+        if (error){
+            console.error("Error CheckReportExists:", error);
+            return res.status(500).json(error);
+        } else {
+            if (results.length > 0){
+                return res.status(200).json({
+                id: results[0].id,
+                user_id,
+                vulnerability_id,
+                status: 0,
+                user_reputation: user.reputation
+            })
+            }
+        }
+    
+    model.CreateNewReport(user_id, vulnerability_id, (error, results) => {
+        if (error){
+            console.error("Error CheckReportExists:", error);
+            return res.status(500).json(error);
+        }
+        
+        model.UpdateReputation(user_id, newRep, (error, results) => {
+            const newRep = user.reputation + vuln.points
+            if (error){
+                console.error("Error CheckReportExists:", error);
+                return res.status(500).json(error);
+        }
+            res.status(201).json({
+                id: results[0].id,
+                user_id,
+                vulnerability_id,
+                status: 0,
+                user_reputation: newRep
+        })
+    })
+
+    })
+
     })
     
     })
 
+})
 }
 
 
