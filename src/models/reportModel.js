@@ -2,13 +2,7 @@ const pool = require('../services/db');
 
 
 // Question 7
-// module.exports.InsertReport = (data, callback) => {
-//     const SQLSTATEMENT = `
-//     SELECT user.id, vulnerability.id
-//     FROM user, vulnerability
-//     WHERE user_id = ?, vulnerability_id = ?
-//     `;
-// }
+
 
 
 module.exports.GetUserById = (user_id, callback) =>
@@ -21,8 +15,8 @@ module.exports.GetUserById = (user_id, callback) =>
 
     pool.query(SQLSTATEMENT, [user_id], callback)
 }
-// 
-// 
+
+
 module.exports.GetVulnerabilityById = (vulnerability_id, callback) =>
 {
     const SQLSTATEMENT = `
@@ -34,17 +28,6 @@ module.exports.GetVulnerabilityById = (vulnerability_id, callback) =>
     pool.query(SQLSTATEMENT, [vulnerability_id], callback)
 }
 
-module.exports.CheckReportExists = (user_id, vulnerability_id, callback) => 
-{
-    const SQLSTATEMENT = `
-    SELECT id
-    FROM report
-    WHERE user_id = ?
-    AND vulnerability_id = ?;
-    `;
-
-    pool.query(SQLSTATEMENT, [user_id, vulnerability_id], callback)
-}
 
 module.exports.CreateNewReport = (user_id, vulnerability_id, callback) => 
 {
@@ -56,7 +39,7 @@ module.exports.CreateNewReport = (user_id, vulnerability_id, callback) =>
     pool.query(SQLSTATEMENT, [user_id, vulnerability_id], callback)
 }
 
-module.exports.UpdateReputation = (user_id, vulnerability_id, callback) =>
+module.exports.UpdateReputation = (user, newRep, callback) =>
 {
     const SQLSTATEMENT = `
     UPDATE user
@@ -64,46 +47,9 @@ module.exports.UpdateReputation = (user_id, vulnerability_id, callback) =>
     WHERE id = ?
     `;
 
-    pool.query(SQLSTATEMENT, [user_id, vulnerability_id], callback)
+    pool.query(SQLSTATEMENT, [user, newRep], callback)
 }
 
-// 
-// module.exports.CheckReportExists = (data, callback) =>
-// {
-//     const SQL = `
-//         SELECT id, status
-//         FROM report
-//         WHERE user_id = ?
-//         AND vulnerability_id = ?
-//     `
-//     const VALUES = [ data.user_id, data.vulnerability_id ]
-//     pool.query(SQL, VALUES, callback)
-// }
-// 
-// 
-// module.exports.CreateReport = (data, callback) =>
-// {
-//     const SQLSTATEMENT = `
-//     INSERT INTO report (user_id, vulnerability_id)
-//     VALUES (?, ?)
-//     `
-//     const VALUES = [data.user_id, data.vulnerability_id]
-// 
-//     pool.query(SQLSTATEMENT, VALUES, callback)
-// }
-// 
-// 
-// module.exports.UpdateReputation = (data, callback) =>
-// {
-//     const SQLSTATEMENT = `
-//     UPDATE user
-//     SET reputation = ?
-//     WHERE id = ?
-//     `
-//     const VALUES = [data.reputation, data.id]
-// 
-//     pool.query(SQLSTATEMENT, VALUES, callback)
-// }
 
 
 
