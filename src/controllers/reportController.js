@@ -10,23 +10,37 @@ module.exports.CreateReport = (req, res, next) => {
     }
 
     const data = {
-        user_id: req.body.user_id,
-        vulnerability_id: req.body.vulnerability_id
+        user_id,
+        vulnerability_id
     }
 
-    const callback = (error, results, fields) => {
+    model.GetUserById(user_id, (error, results) => {
         if (error){
-            console.error("Error Creating report:", error);
+            console.error("Error CheckUserId:", error);
             return res.status(500).json(error);
+            
         } else {
             if (results.length === 0){
-                return res.status(404).json({message: "User_id or Vulnerability_id not found"})
+                return res.status(404).json({message: "User not found"})
+            }
         }
-    }
-    model.InsertReport(data, callback)
-}
+
+    model.GetVulnerabilityById(vulnerability_id, (error2, results2) => {
+        if (error){
+            console.error("Error CheckVulnerabilityId:", error2);
+            return res.status(500).json(error2);
+        } else {
+            if (results2.length === 0){
+                return res.status(404).json({message: "Vulnerability not found"})
+            }
+        }
+    })
+    
+    })
 
 }
+
+
 
 // // Verify that user exists
 // module.exports.CheckUserId = (req, res, next) =>
