@@ -30,18 +30,6 @@ module.exports.GetVulnerabilityById = (data, callback) =>
     pool.query(SQLSTATEMENT, VALUES, callback)
 }
 
-// module.exports.CheckReportExists = (data, callback) =>
-// {
-//     const SQL = `
-//         SELECT id, status
-//         FROM report
-//         WHERE user_id = ?
-//         AND vulnerability_id = ?
-//     `
-//     const VALUES = [ data.user_id, data.vulnerability_id ]
-//     pool.query(SQL, VALUES, callback)
-// }
-
 
 module.exports.CreateReport = (data, callback) =>
 {
@@ -71,77 +59,65 @@ module.exports.UpdateReputation = (data, callback) =>
 
 
 // Question 8
-// module.exports.CheckReportById = (data, callback) => {
-//     const SQLSTATEMENT = `
-//     SELECT id
-//     FROM report
-//     WHERE id = ?;
-//     `;
-//     const VALUES = [data.id];
-// 
-//     pool.query(SQLSTATEMENT, VALUES, callback);
-// }
-// 
-// module.exports.CheckUserById = (data, callback) => {
-//     const SQLSTATEMENT = `
-//     SELECT id 
-//     FROM user
-//     WHERE id = ?
-//     `;
-//     const VALUES = [data.id];
-// 
-//     pool.query(SQLSTATEMENT, VALUES, callback);
-// }
-// 
-// module.exports.UpdateReportAndReputation = (data, callback) =>
-// {
-//     // const SQLSTATEMENT = `
-//     //     /* update report and user rep */
-//     //     UPDATE report AS r
-//     //     JOIN vulnerability AS v ON v.id = r.vulnerability_id
-//     //     JOIN user AS u ON u.id = ?
-//     //     SET r.status     = ?,
-//     //     r.user_id = ?,
-//     //            u.reputation = CASE
-//     //                            WHEN r.status <> ?
-//     //                            THEN u.reputation + v.points
-//     //                            ELSE u.reputation
-//     //                           END
-//     //     WHERE r.id = ?;
-//     //     SELECT u.reputation AS user_reputation
-//     //     FROM user u
-//     //     WHERE u.id = ?;
-//     // `;
-//     const SQLSTATEMENT = `
-//     UPDATE report
-//     JOIN vulnerability ON vulnerability.id = report.vulnerability_id
-//     JOIN user ON user.id = ?
-//     SET
-//     report.status = ?,
-//     report.user_id = ?,
-//     user.reputation = CASE
-//         WHEN report.status <> ? 
-//         THEN user.reputation + vulnerability.points
-//         ELSE user.reputation
-//     END
-//     Where report.id = ?;
-//     
-//     SELECT reputation AS user_reputation 
-//     FROM user
-//     WHERE id = ?;
-//     `;
-//     // Update the report status and user's reputation
-// 
-//     const VALUES = [data.user_id, data.status, data.user_id, data.status, data.id, data.user_id];
-// 
-//     pool.query(SQLSTATEMENT, VALUES, (error, results) =>
-//     {
-//         if (error) {
-//             return callback(error);
-//         }
-// 
-//         // results[0] is UPDATE OkPacket, results[1] is SELECT rows
-//         const newRep = results[1][0].user_reputation;
-//         callback(null, { affectedRows: results[0].affectedRows, newRep });
-//     });
-// };
+
+// Check if the report exists
+    module.exports.CheckReportById = (data, callback) => {
+        const SQLSTATEMENT = `
+        SELECT id
+        FROM report
+        WHERE id = ?;
+        `;
+        const VALUES = [data.id];
+
+        pool.query(SQLSTATEMENT, VALUES, callback);
+    }
+
+
+// Check if user exists
+    module.exports.CheckUserById = (data, callback) => {
+        const SQLSTATEMENT = `
+        SELECT id 
+        FROM user
+        WHERE id = ?
+        `;
+        const VALUES = [data.id];
+
+        pool.query(SQLSTATEMENT, VALUES, callback);
+    }
+
+
+
+// Update the report and reputation
+    module.exports.UpdateReportAndReputation = (data, callback) =>
+    {
+        const SQLSTATEMENT = `
+        UPDATE report
+        JOIN vulnerability ON vulnerability.id = report.vulnerability_id
+        JOIN user ON user.id = ?
+        SET user.reputation = user.reputation + vulnerability.points,
+        report.status = ?,
+        report.user_id = ?
+
+        WHERE report.id = ?;
+        
+        SELECT reputation AS user_reputation 
+        FROM user
+        WHERE id = ?;
+        `;
+        
+// Selecting the user.id from user, Mark it closed on request body, then record who closed it, filter that specific report id, lastly it selects the reputation from user
+        const VALUES = [data.user_id, data.status, data.user_id, data.id, data.user_id];
+
+
+
+
+        pool.query(SQLSTATEMENT, VALUES, (error, results) =>
+        {
+            if (error) {
+                return callback(error);
+            }
+
+            const newRep = results[1][0].user_reputation; // Selecting the row with user_reputation, then store it in newRep
+            callback(null, { affectedRows: results[0].affectedRows, newRep }); // How many rows affected(2), and the newRep
+        });
+    };
