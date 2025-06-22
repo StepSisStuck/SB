@@ -24,7 +24,7 @@ module.exports.CreateNewUser = (req, res, next) =>
                 return res.status(500).json(error);
         }
             res.status(201).json({
-                id: results.insertId,
+                id: Number(results.insertId),
                 username: data.username,
                 reputation: 0
             });
