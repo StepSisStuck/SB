@@ -26,7 +26,66 @@ user_id INT NOT NULL,
 vulnerability_id INT NOT NULL,
 status BOOLEAN NOT NULL DEFAULT 0 -- 0 for Open, 1 for Closed
 );
+
+-- Section B
+DROP TABLE IF EXISTS QuestStart;
+DROP TABLE IF EXISTS QuestCompletion;
+DROP TABLE IF EXISTS GameUser;
+DROP TABLE IF EXISTS Quests;
+
+CREATE TABLE GameUser (
+id INT AUTO_INCREMENT PRIMARY KEY,
+username VARCHAR(255) NOT NULL UNIQUE,
+XP INT NOT NULL DEFAULT 0
+);
+
+INSERT INTO GameUser (username)
+VALUES
+("SJW");
+
+
+CREATE TABLE Quests (
+id INT AUTO_INCREMENT PRIMARY KEY,
+title VARCHAR(100) NOT NULL UNIQUE,
+description VARCHAR(255) NOT NULL,
+xp_reward INT NOT NULL,
+required_rank VARCHAR(20) NOT NULL
+);
+
+INSERT INTO Quests (title, description, xp_reward, required_rank)
+VALUES
+("Fix the codes", "A certain code is causing problems to the server", 10, "E-Rank");
+
+CREATE TABLE QuestStart (
+id INT AUTO_INCREMENT PRIMARY KEY,
+user_id INT NOT NULL, 
+quest_id INT NOT NULL,
+started_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+UNIQUE KEY uq_user_quest (user_id, quest_id),
+FOREIGN KEY (user_id) REFERENCES GameUser(id),
+FOREIGN KEY (quest_id) REFERENCES Quests(id)
+);
+
+
+
+
+
+CREATE TABLE QuestCompletion (
+id INT AUTO_INCREMENT PRIMARY KEY,
+user_id INT NOT NULL,
+quest_id INT NOT NULL,
+completed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+UNIQUE KEY uq_user_complete (user_id, quest_id),
+FOREIGN KEY (user_id)  REFERENCES GameUser(id),
+FOREIGN KEY (quest_id) REFERENCES Quests(id)
+);
+
+
 `;
+
+
+
+
 
 
 pool.query(SQLSTATEMENT, (error, results, fields) => {
