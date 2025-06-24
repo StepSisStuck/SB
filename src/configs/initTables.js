@@ -36,12 +36,13 @@ DROP TABLE IF EXISTS Quests;
 CREATE TABLE GameUser (
 id INT AUTO_INCREMENT PRIMARY KEY,
 username VARCHAR(255) NOT NULL UNIQUE,
-XP INT NOT NULL DEFAULT 0
+XP INT NOT NULL DEFAULT 0,
+user_rank VARCHAR(20) NOT NULL DEFAULT "E-Hunter"
 );
 
-INSERT INTO GameUser (username)
+INSERT INTO GameUser (username, user_rank)
 VALUES
-("SJW");
+("SJW", "E-Hunter");
 
 
 CREATE TABLE Quests (
