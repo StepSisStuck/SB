@@ -3,7 +3,7 @@ const levels = require("../configs/levels.js")
 
 
 
-
+// Creating the quests
 module.exports.CreateQuests = (req, res, next) =>
 {
     const { title, description, xp_reward, required_rank } = req.body;
@@ -37,6 +37,7 @@ module.exports.CreateQuests = (req, res, next) =>
 }
 
 
+// Get all the quests
 module.exports.GetAllQuest = (req, res, next) =>
 {
     const callback = (error, results, fields) => {
@@ -51,9 +52,45 @@ module.exports.GetAllQuest = (req, res, next) =>
 }
 
 
+// Middleware to load the XP and Username
+module.exports.LoadXp = (req, res, next) =>
+{
+    if (req.params.id === undefined) {
+        res.status(400).send("Error: Quest ID is undefined");
+        return;
+    }
+    
+    const data = {
+        quest_id: Number(req.params.id),
+        user_id: req.body.user_id
+    }
+
+    if (isNaN(data.quest_id || isNaN(data.user_id))) {
+        res.status(400).send ("Error: IDs must be a nummber");
+        return;
+    }
+
+    const callback = (error, results, fields) => {
+        if (error) {
+            console.error("Error loading :", error);
+            return res.status(500).json(error);
+        } else {
+            if (results.length === 0) {
+                return res.status(404).json({error: "Quest or User not found"});
+            }
+        }
+        res.locals.xp_reward = results[0].xp_reward;
+        res.locals.username = results[0].username;
+        next();
+
+    }
+    model.GetXpReward(data, callback)
+}
 
 
 
+
+// Show that you've started the quest
 module.exports.StartQuest = (req, res, next) =>
 {
     if(req.body.user_id == undefined)
@@ -88,15 +125,12 @@ module.exports.StartQuest = (req, res, next) =>
                 return res.status(500).json(error2);
             }
             
-        } // ERROR CANNOT FIND USER NOT FOUND
-            if (results.affectedRows == 0) {
-                res.status(404).json({message: "User not found"});
-            }
+        } 
             res.status(201).json({
             id: results2.insertId,
             user_id: data.user_id,
             quest_id: Number(data.id),
-            status: "Hunting in progress",
+            status: "User " + res.locals.username + " has started his quest",
             started_at: new Date().toISOString()
         })
     }
@@ -105,6 +139,8 @@ module.exports.StartQuest = (req, res, next) =>
 }
 
 
+
+// Show that youve completed the quest
 module.exports.CompleteQuest = (req, res, next) =>
 {
     if (req.params.id == undefined || req.body.user_id == undefined) {
@@ -140,15 +176,12 @@ module.exports.CompleteQuest = (req, res, next) =>
             }
                 
         }
-
-      // 3) Success
-            if (results.affectedRows == 0) {
-                res.status(404).json({message: "User not found"});
-            }
             res.status(201).json({
-            message:  "Quest completed",
-            user_id:  data.user_id,
-            quest_id: data.id,
+            Message:  "Quest completed",
+            User_id:  data.user_id,
+            User: res.locals.username,
+            quest_id: Number(data.id),
+            Rewarded_Xp: res.locals.xp_reward,
             Completed_at: new Date().toISOString()
         });
     }; 
