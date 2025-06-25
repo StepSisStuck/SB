@@ -50,10 +50,10 @@ id INT AUTO_INCREMENT PRIMARY KEY,
 title VARCHAR(100) NOT NULL UNIQUE,
 description VARCHAR(255) NOT NULL,
 xp_reward INT NOT NULL,
-required_rank VARCHAR(20) NOT NULL
+recommended_rank VARCHAR(20) NOT NULL
 );
 
-INSERT INTO Quests (title, description, xp_reward, required_rank)
+INSERT INTO Quests (title, description, xp_reward, recommended_rank)
 VALUES
 ("Fix the codes", "A certain code is causing problems to the server", 10, "E-Rank");
 

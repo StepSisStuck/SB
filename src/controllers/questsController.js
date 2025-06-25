@@ -1,25 +1,23 @@
 const model = require("../models/questsModel.js");
-const levels = require("../configs/levels.js")
-
 
 
 // Creating the quests
 module.exports.CreateQuests = (req, res, next) =>
 {
-    const { title, description, xp_reward, required_rank } = req.body;
+    const { title, description, xp_reward, recommended_rank } = req.body;
 
-    if(!title || !description || xp_reward == null || !required_rank)
+    if(!title || !description || xp_reward == null || !recommended_rank)
     {
-        res.status(400).send("Error: Title, description, xp_reward or required_rank is undefined");
+        res.status(400).send("Error: Title, description, xp_reward or recommended_rank is undefined");
         return;
     }
  
-    const data = { title, description, xp_reward: Number(xp_reward), required_rank };
+    const data = { title, description, xp_reward: Number(xp_reward), recommended_rank };
 
     const callback = (error, results, fields) => {
         if (error) {
             console.error("Error createNewuser:", error);
-            if (error.code === 'ER_DUP_ENTRY') { //Ensure no duplicates
+            if (error.code === 'ER_DUP_ENTRY') {
                 return res.status(409).json({ error: "Quest already exists" });
             }
                 return res.status(500).json(error);
@@ -29,7 +27,7 @@ module.exports.CreateQuests = (req, res, next) =>
                 title: data.title,
                 description: data.description,
                 xp_reward: data.xp_reward,
-                required_rank: data.required_rank
+                recommended_rank: data.recommended_rank
             });
     }
 
@@ -143,51 +141,34 @@ module.exports.StartQuest = (req, res, next) =>
 // Show that youve completed the quest
 module.exports.CompleteQuest = (req, res, next) =>
 {
-    if (req.params.id == undefined || req.body.user_id == undefined) {
-        res.status(400).send("Error: Missing fields required");
-        return;
-    }
-
     const data = {
-        id: req.params.id,
-        user_id: req.body.user_id
+        id:      Number(req.params.id),
+        user_id: Number(req.body.user_id)
     };
-
     if (isNaN(data.id) || isNaN(data.user_id)) {
-        res.status(400).send("Error: IDs must be numbers");
-        return;
+        return res.status(400).send("Error: invalid IDs");
     }
 
-
-    const callbackRemove = (error, results) => {
+    const callback = (error, results, fields) => {
         if (error) {
-            console.error("Error removing start record:", error);
-        return res.status(500).json(error);
-        }
-
-    // 2) Insert completion record
-    const callbackComplete = (error2, results2) => {
-        if (error2) {
-            console.error("Error completing quest:", error2);
-            if (error2.code === 'ER_DUP_ENTRY') {
-                return res.status(409).json({ error: "Quest already completed" });
-            } else {
-                return res.status(500).json(error2);
+            console.error("Error createNewuser:", error);
+            if (error.code === 'ER_DUP_ENTRY') {
+                return res.status(409).json({ error: "Quest already exists" });
             }
-                
+                return res.status(500).json(error);
         }
-            res.status(201).json({
-            Message:  "Quest completed",
-            User_id:  data.user_id,
-            User: res.locals.username,
-            quest_id: Number(data.id),
-            Rewarded_Xp: res.locals.xp_reward,
-            Completed_at: new Date().toISOString()
-        });
-    }; 
-    model.completeQuest(data, callbackComplete);
-  };
-
-    
-    model.removeStart(data, callbackRemove);
-};
+        // result = { xp, level }
+        res.status(200).json({
+        message:     "Quest completed",
+        user_id:     data.user_id,
+        username:    res.locals.username,
+        quest_id:    data.id,
+        rewarded_xp: res.locals.xp_reward,
+        total_xp:    results.xp,
+        level:       results.level,
+        xp_to_next:  results.nextXp,
+        completed_at:new Date().toISOString()
+    });
+}
+    model.finishQuest(data, callback);
+  }

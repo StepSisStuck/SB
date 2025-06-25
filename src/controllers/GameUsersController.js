@@ -1,5 +1,5 @@
 const model = require("../models/GameUsersModel.js");
-const levels = require("../configs/levels.js")
+
 
 module.exports.CreateGameUsers = (req, res, next) =>
 {
