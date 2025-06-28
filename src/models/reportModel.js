@@ -108,9 +108,6 @@ module.exports.UpdateReputation = (data, callback) =>
 // Selecting the user.id from user, Mark it closed on request body, then record who closed it, filter that specific report id, lastly it selects the reputation from user
         const VALUES = [data.user_id, data.status, data.user_id, data.id, data.user_id];
 
-
-
-
         pool.query(SQLSTATEMENT, VALUES, (error, results) =>
         {
             if (error) {

@@ -13,12 +13,24 @@ username VARCHAR(255) NOT NULL UNIQUE,
 reputation INT DEFAULT 0
 );
 
+INSERT INTO User (username, reputation)
+VALUES
+("Bob", 0);
+
 CREATE TABLE Vulnerability (
 id INT AUTO_INCREMENT PRIMARY KEY,
 type TEXT NOT NULL,
 description TEXT NOT NULL,
 points INT NOT NULL
 );
+
+INSERT INTO Vulnerability (type, description, points)
+VALUES
+("XSS", "Cross-Site Scripting (XSS) allows attackers to inject malicious scripts into web pages", 50),
+("SQL Injection", "SQL Injection allows attackers to manipulate a web application's database by injecting malicious SQL code through input fields", 100),
+("CSRF", "Cross-Site Request Forgery (CSRF) security vulnerability tricks authenticated users into performing unwanted actions on a web application.", 80),
+("Open Redirect", "Open Redirect occurs when a web application allows users to control the URL to which they are redirected, potentially leading to phishing attacks or malware distribution", 20);
+
 
 CREATE TABLE Report (
 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,7 +67,9 @@ recommended_rank VARCHAR(20) NOT NULL
 
 INSERT INTO Quests (title, description, xp_reward, recommended_rank)
 VALUES
-("Fix the codes", "A certain code is causing problems to the server", 10, "E-Rank");
+("Fix the codes", "There's an error in the codes, find it", 10, "E-Rank"),
+("Find the vulnerability", "A certain code is causing problems to the server", 50, "D-Rank");
+
 
 CREATE TABLE QuestStart (
 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -66,8 +80,6 @@ UNIQUE KEY uq_user_quest (user_id, quest_id),
 FOREIGN KEY (user_id) REFERENCES GameUser(id),
 FOREIGN KEY (quest_id) REFERENCES Quests(id)
 );
-
-
 
 
 

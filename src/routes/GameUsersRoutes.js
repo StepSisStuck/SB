@@ -6,6 +6,7 @@ router.post("/", controller.CreateGameUsers)
 router.get("/", controller.GetAllGameUsers)
 router.get("/:id", controller.GetGameUsersById)
 router.put("/:id", controller.UpdateGameUsers)
+router.post("/pvp", controller.ChallengePlayers)
 
 
 

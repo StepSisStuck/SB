@@ -21,6 +21,32 @@ module.exports.selectAll = (callback) =>
 pool.query(SQLSTATMENT, callback);
 }
 
+module.exports.selectById = (data, callback) =>
+{
+    const SQLSTATMENT = `
+    SELECT * FROM quests
+    WHERE id = ?;
+    `;
+const VALUES = [data.id];
+
+pool.query(SQLSTATMENT, VALUES, callback);
+}
+
+module.exports.updateById = (data, callback) =>
+{
+    const SQLSTATMENT = `
+    UPDATE quests
+    SET title = ?, 
+    description = ?, 
+    xp_reward = ?, 
+    recommended_rank = ?
+    WHERE id = ?;
+    `;
+const VALUES = [data.title, data.description, data.xp_reward, data.recommended_rank, data.id];
+
+pool.query(SQLSTATMENT, VALUES, callback);
+}
+
 
 module.exports.GetXpReward = (data, callback) => 
 {
@@ -62,7 +88,7 @@ module.exports.StartingQuest = (data, callback) => {
 
 module.exports.finishQuest = (data, callback) =>
 {
-  // 1) remove quest start
+// remove the starting quest so that you can create a new quest
   const SQLSTATEMENT_REMOVE_START = `
   DELETE FROM QuestStart
   WHERE user_id = ? 
@@ -70,10 +96,10 @@ module.exports.finishQuest = (data, callback) =>
   `;
   const VALUES_REMOVE = [ data.user_id, data.id ];
   pool.query(SQLSTATEMENT_REMOVE_START, VALUES_REMOVE, (error1) => {
-    if (error1) return callback(err1);
+    if (error1) return callback(error1);
 
 
-    // 2) log completion
+// Create the logs to put info into questcompletion
   const SQLSTATEMENT_LOG = `
     INSERT INTO QuestCompletion (user_id, quest_id)
     VALUES (?, ?);
@@ -83,7 +109,7 @@ module.exports.finishQuest = (data, callback) =>
     if (error2) return callback(error2);
 
 
-      // 3) award xp
+// Give the quest xp to the player
   const SQLSTATEMENT_AWARD = `
     UPDATE GameUser
     SET xp = xp + (
@@ -97,7 +123,7 @@ module.exports.finishQuest = (data, callback) =>
     if (error3) return callback(error3);
 
 
-        // 4) fetch new xp
+// Get the XP from gameuser
   const SQLSTATEMENT_FETCH_XP = `
     SELECT xp
     FROM GameUser
@@ -109,7 +135,7 @@ module.exports.finishQuest = (data, callback) =>
       const newXp = rows[0].xp;
 
 
-          // 5) compute new level & xp to next
+// calculate the new xp and how much xp player needs for next level
     let newLevel = levels[0].name;
     let xpToNext = 0;
     for (let i = 0; i < levels.length; i++)
@@ -122,9 +148,9 @@ module.exports.finishQuest = (data, callback) =>
       } else {
         break;
       }
-            
     }
-          // 6) update rank
+
+// Update the user_rank with the new rank
   const SQLSTATEMENT_UPDATE_RANK = `
     UPDATE GameUser
     SET user_rank = ?
@@ -133,8 +159,7 @@ module.exports.finishQuest = (data, callback) =>
   const VALUES_UPDATERANK = [newLevel, data.user_id]
   pool.query(SQLSTATEMENT_UPDATE_RANK, VALUES_UPDATERANK, (error5) => {
     if (error5) return callback(error5);
-
-            // done!
+  
   callback(null, {xp: newXp, level: newLevel, nextXp: xpToNext
             });
           });

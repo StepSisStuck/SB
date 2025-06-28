@@ -78,9 +78,7 @@ module.exports.UpdateGameUsers = (req, res, next) =>
 {
     if(req.body.username == undefined)
     {
-        res.status(400).json({
-            message: "Error: Username is undefined"
-        });
+        res.status(400).send("Error: Username is undefined");
         return;
     }
 
@@ -92,7 +90,7 @@ module.exports.UpdateGameUsers = (req, res, next) =>
     const callback = (error, results) => {
         if (error) {
             console.error("Error UpdateGameUsers:", error);
-            if (error.code === 'ER_DUP_ENTRY') { // Ensure no duplicates
+            if (error.code === 'ER_DUP_ENTRY') { 
                 return res.status(409).json({ error: "Username already exists" });
             } else {
                 return res.status(500).json(error);
@@ -110,3 +108,41 @@ module.exports.UpdateGameUsers = (req, res, next) =>
 
     model.updateById(data, callback);
 }
+
+module.exports.ChallengePlayers = (req, res, next) =>
+{
+    const data = {
+        challenger_id: Number(req.body.challenger_id),
+        opponent_id: Number(req.body.opponent_id)
+    };
+
+    if (isNaN(data.challenger_id) || isNaN(data.opponent_id))
+    {
+        res.status(400).send("Error: invalid player IDs");
+        return;
+    }
+
+    const callback = (error, result) =>
+    {
+       if (error) {
+            console.error("Error createNewuser:", error);
+            if (error.code === 'USER_NOT_FOUND') {
+                return res.status(409).json({ error: "One of the player is not found" });
+            } else {
+                return res.status(500).json(error);
+            }
+                
+        }
+        res.status(200).json({
+            challenger_id: data.challenger_id,
+            opponent_id:   data.opponent_id,
+            winner_id:     result.winner_id,
+            winner_rank:   result.winner_rank,
+            loser_id:      result.loser_id,
+            loser_rank:    result.loser_rank,
+            message:       "Player " + result.winner_id + " wins!"
+        });
+    };
+
+    model.challengePlayers(data, callback);
+};

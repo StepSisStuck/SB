@@ -98,18 +98,17 @@ module.exports.UpdateUserById = (req, res, next) =>
     const callback = (error, results) => {
         if (error) {
             console.error("Error UpdateUserById:", error);
-            if (error.code === 'ER_DUP_ENTRY') { // Ensure no duplicates
+            if (error.code === 'ER_DUP_ENTRY') {
                 return res.status(409).json({ error: "Username already exists" });
             } else {
                 return res.status(500).json(error);
             }
         }
-
             if (results.affectedRows == 0) {
                 res.status(404).json({message: "User not found"});
             }
             res.status(201).json({
-                id: data.id,
+                id: Number(data.id),
                 username: data.username,
                 reputation: data.reputation
             });
